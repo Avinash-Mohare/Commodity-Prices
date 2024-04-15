@@ -10,10 +10,10 @@ function createUrl(commodityName, commodityValue){
         Tx_State: 0,
         Tx_District: 0,
         Tx_Market: 0,
-        DateFrom: "01-Apr-2024",
-        DateTo: "14-Apr-2024",
-        Fr_Date: "01-Apr-2024",
-        To_Date: "14-Apr-2024",
+        DateFrom: "15-Apr-2024",
+        DateTo: "15-Apr-2024",
+        Fr_Date: "15-Apr-2024",
+        To_Date: "15-Apr-2024",
         Tx_Trend: 0,
         Tx_CommodityHead: encodeURIComponent(commodityName),
         Tx_StateHead: "--Select--",
@@ -46,7 +46,6 @@ async function fetchData(url) {
             const modalPrice = $(columns[8]).text().trim();
             const date = $(columns[9]).text().trim();
 
-
             // Check if the row contains "No Data Found" or an empty row
             if (columns.length === 0 || (columns.length === 1 && $(columns[0]).attr('colspan') === '12')) {
                 console.log("Skipping empty row or 'No Data Found' row");
@@ -64,6 +63,8 @@ async function fetchData(url) {
                     console.error('Error saving data to database:', error);
                 }
             }
+
+            console.log(date);
         });
 
 

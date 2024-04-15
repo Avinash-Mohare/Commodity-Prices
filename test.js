@@ -5,3 +5,5 @@ const dateObj = parse(dateStr, 'dd/MM/yyyy', new Date());
 const formattedDate = format(dateObj, 'dd MMM yyyy');
 
 console.log(formattedDate); 
+
+
