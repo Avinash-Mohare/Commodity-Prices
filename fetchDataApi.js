@@ -2,11 +2,11 @@ const axios = require('axios');
 const { parse, format } = require('date-fns');
 const db = require('./db');
 
-const url = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001a1976701d7c147736afd9ff243608d48&format=json&limit=100000';
+const url = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001a1976701d7c147736afd9ff243608d48&format=json&limit=10000';
 
-const fetchDataAndInsert = async () => {
+const fetchDataAndInsert = async (offset = 0) => {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(`${url}&offset=${offset}`);
     const data = response.data;
     const records = data.records;
 
@@ -44,7 +44,12 @@ const fetchDataAndInsert = async () => {
       }
     }
 
-    console.log("Task successful");
+    // If there are more records, fetch the next chunk
+    if (records.length === 10000) {
+      await fetchDataAndInsert(offset + 10000);
+    } else {
+      console.log("Task successful");
+    }
 
   } catch (error) {
     console.error('Error fetching data:', error);
