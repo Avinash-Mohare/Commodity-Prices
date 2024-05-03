@@ -1,6 +1,8 @@
+//Doesnt work because the API has been made private
+
 const axios = require('axios');
 const { parse, format } = require('date-fns');
-const db = require('./db');
+// const db = require('./db');
 
 const url = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001a1976701d7c147736afd9ff243608d48&format=json&limit=10000';
 
@@ -32,11 +34,11 @@ const fetchDataAndInsert = async (offset = 0) => {
         const formattedDate = format(new Date(date), 'yyyy-MM-dd HH:mm:ss');
 
         try {
-          const sql = `
-            INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `;
-          await db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
+          // const sql = `
+          //   INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
+          //   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          // `;
+          // await db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
           console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate);
         } catch (error) {
           console.error('Error saving data to database:', error);

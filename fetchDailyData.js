@@ -1,8 +1,9 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const {commoditySet2} = require("../utils/commodities");
+const { parse, format } = require('date-fns');
+const {commodityMain} = require("./utils/mainCommodities");
 
-const db = require("../db");
+const db = require("./db");
 
 function createUrl(commodityName, commodityValue){
     const params = new URLSearchParams({
@@ -10,10 +11,10 @@ function createUrl(commodityName, commodityValue){
         Tx_State: 0,
         Tx_District: 0,
         Tx_Market: 0,
-        DateFrom: "01-May-2024",
-        DateTo: "02-May-2024",
-        Fr_Date: "01-May-2024",
-        To_Date: "02-May-2024",
+        DateFrom: "03-May-2024",
+        DateTo: "03-May-2024",
+        Fr_Date: "03-May-2024",
+        To_Date: "03-May-2024",
         Tx_Trend: 0,
         Tx_CommodityHead: encodeURIComponent(commodityName),
         Tx_StateHead: "--Select--",
@@ -46,7 +47,6 @@ async function fetchData(url) {
             const modalPrice = $(columns[8]).text().trim();
             const date = $(columns[9]).text().trim();
 
-
             // Check if the row contains "No Data Found" or an empty row
             if (columns.length === 0 || (columns.length === 1 && $(columns[0]).attr('colspan') === '12')) {
                 console.log("Skipping empty row or 'No Data Found' row");
@@ -54,16 +54,21 @@ async function fetchData(url) {
             else{
                 // Insert data into MySQL
                 try {
-                    const sql = `
-                        INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    `;
-                    db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date]);
-                    console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date);
+                    const formattedDate = format(parse(date, 'dd MMM yyyy', new Date()), 'yyyy-MM-dd HH:mm:ss');
+                    // const sql = `
+                    //     INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
+                    //     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    // `;
+                    // db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
+                    // console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate);
+
+                    console.log(formattedDate, url);
                 } catch (error) {
                     console.error('Error saving data to database:', error);
                 }
             }
+
+            console.log(date);
         });
 
 
@@ -92,5 +97,5 @@ function fetchDataWithDelay(url, delay) {
 
 
   // Usage
-  fetchDataForCommodities(commoditySet2);
+  fetchDataForCommodities(commodityMain);
   
