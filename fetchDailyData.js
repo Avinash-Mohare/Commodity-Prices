@@ -1,20 +1,23 @@
+const express = require('express');
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { parse, format } = require('date-fns');
 const {commodityMain} = require("./utils/mainCommodities");
-
+const {parse, format} = require('date-fns');
 const db = require("./db");
+const app = express();
+const port = 3000;
 
-function createUrl(commodityName, commodityValue){
+//Functions 
+function createUrl(commodityName, commodityValue, date){
     const params = new URLSearchParams({
         Tx_Commodity: commodityValue,
         Tx_State: 0,
         Tx_District: 0,
         Tx_Market: 0,
-        DateFrom: "03-May-2024",
-        DateTo: "03-May-2024",
-        Fr_Date: "03-May-2024",
-        To_Date: "03-May-2024",
+        DateFrom: date,
+        DateTo: date,
+        Fr_Date: date,
+        To_Date: date,
         Tx_Trend: 0,
         Tx_CommodityHead: encodeURIComponent(commodityName),
         Tx_StateHead: "--Select--",
@@ -31,10 +34,8 @@ async function fetchData(url) {
     // console.log(url);
     try {
         const response = await axios.get(url);
-
         const $ = cheerio.load(response.data);
         const tableRows = $("table.tableagmark_new tbody tr");
-
         tableRows.each((index, element) => {
             const columns = $(element).find("td");
             const district = $(columns[1]).text().trim();
@@ -52,31 +53,23 @@ async function fetchData(url) {
                 console.log("Skipping empty row or 'No Data Found' row");
             }
             else{
-                // Insert data into MySQL
                 try {
                     const formattedDate = format(parse(date, 'dd MMM yyyy', new Date()), 'yyyy-MM-dd HH:mm:ss');
-                    // const sql = `
-                    //     INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
-                    //     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    // `;
-                    // db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
-                    // console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate);
-
-                    console.log(formattedDate, url);
+                    const sql = `
+                        INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `;
+                    db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
+                    console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate);
                 } catch (error) {
                     console.error('Error saving data to database:', error);
                 }
             }
-
-            console.log(date);
         });
-
-
     } catch (error) {
         console.error("Error fetching data:", error);
     }
 }
-
 
 function fetchDataWithDelay(url, delay) {
     return new Promise((resolve) => {
@@ -88,14 +81,28 @@ function fetchDataWithDelay(url, delay) {
     });
   }
 
-  async function fetchDataForCommodities(commoditySet) {
-    for (const [commodity, commodityCode] of Object.entries(commoditySet)) {
-      const url = createUrl(commodity, commodityCode);
-      await fetchDataWithDelay(url, 100);
+async function fetchDataForCommodities(commoditySet, date) {
+for (const [commodity, commodityCode] of Object.entries(commoditySet)) {
+        const url = createUrl(commodity, commodityCode, date);
+        await fetchDataWithDelay(url, 100);
     }
+}
+
+
+app.get('/fetch-data', async (req, res) => {
+  try {
+    const {date} = req.query
+    if (!date) {
+        return res.status(400).send('Date is required');
+    }
+
+    await fetchDataForCommodities(commodityMain, date);
+    res.send('Data fetch completed');
+  } catch (error) {
+    res.status(500).send('Error fetching data');
   }
+});
 
-
-  // Usage
-  fetchDataForCommodities(commodityMain);
-  
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
