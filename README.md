@@ -36,7 +36,19 @@ Using the API
    ```bash
    /fetch-data/?date=15-Apr-2024
    ```
-   
+
+Fetching and storing the data using the Scripts -
+
+agmarknet.js, agmarknet2.js are the 2 Scripts that are used to fetch and store the data in the DB. 
+To run these scripts use the command - 
+   ```bash
+      node --max-old-space-size=16384 <script_name>
+   ```
+The data that is being stored by this script initially have "formattedDate" field as "Null" in the DB. To populate this field use the command 
+   ```bash
+      UPDATE prices
+      SET formattedDate = DATE_FORMAT(STR_TO_DATE(date, '%d %b %Y'), '%Y-%m-%dT%H:%i:%s');
+   ```
 
 
 
