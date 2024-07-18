@@ -53,6 +53,50 @@ const formattedDate = moment(date, 'DD MMM YYYY')
     // res.send('Received query parameters');
 });
 
+app.get('/initial-data', async (req, res) => {
+    const { district, date, page = 1, limit = 10 } = req.query;
+    
+    if (!district || !date) {
+        return res.status(400).json({ error: 'Missing required query parameters' });
+    }
+
+    const formattedDate = moment(date, 'DD MMM YYYY')
+        .subtract(1, 'days') // Subtract one day
+        .set({ hour: 18, minute: 30, second: 0 }) // Set time to 18:30:00
+        .toISOString();
+
+    console.log(formattedDate);
+
+    try {
+        const offset = (page - 1) * limit;
+        const query = `
+            SELECT p1.* 
+            FROM prices p1 
+            JOIN (
+                SELECT market, MAX(formatteddate) AS max_date 
+                FROM prices 
+                WHERE formatteddate <= ? AND district = ? 
+                GROUP BY market
+            ) p2 
+            ON p1.market = p2.market AND p1.formatteddate = p2.max_date 
+            WHERE p1.district = ? 
+            ORDER BY p1.formatteddate DESC 
+            LIMIT ? OFFSET ?
+        `;
+        const params = [formattedDate, district, district, parseInt(limit), parseInt(offset)];
+
+        console.log(query, params);
+
+        const [rows, fields] = await db.query(query, params);
+
+        console.log(rows);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 db.query("SELECT 1")
     .then(() => {
         console.log("DB Connection successful");
