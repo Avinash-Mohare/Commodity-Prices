@@ -22,9 +22,11 @@ const formattedDate = moment(date, 'DD MMM YYYY')
     .toISOString(); 
     console.log(formattedDate);
     try {
-        const query = 'SELECT * FROM prices WHERE commodity = $1 AND district = $2 AND market = $3 AND formatteddate <= $4 ORDER BY formatteddate DESC limit 1';
+        const query = 'SELECT * FROM prices WHERE commodity = ? AND district = ? AND market = ? AND formatteddate <= ? ORDER BY formatteddate DESC limit 1';
         const params = [commodity, district, market, formattedDate];
-        const { rows } = await db.query(query, params);
+	console.log(query,params);
+        const [rows,fields] = await db.query(query, params);
+        console.log(rows);
         res.json(rows);
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -39,7 +41,7 @@ db.query("SELECT 1")
     .then(() => {
         console.log("DB Connection successful");
         app.listen(port, () => {
-            console.log("Server started at Port 8000");
+            console.log("Server started at Port ",port);
         });
     })
     .catch((err) => console.log(`DB connection failed ${err}`));
