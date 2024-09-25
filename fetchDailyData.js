@@ -5,7 +5,7 @@ const {commodityMain} = require("./utils/mainCommodities");
 const {parse, format} = require('date-fns');
 const db = require("./db");
 const app = express();
-const port = 3000;
+const port = 8810;
 
 //Functions 
 function createUrl(commodityName, commodityValue, date){
@@ -59,6 +59,7 @@ async function fetchData(url) {
                         INSERT INTO prices (district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `;
+                    console.log(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
                     db.query(sql, [district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate]);
                     console.log('Data saved to database:', district, market, commodity, variety, grade, minPrice, maxPrice, modalPrice, date, formattedDate);
                 } catch (error) {
