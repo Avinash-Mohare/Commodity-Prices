@@ -10,10 +10,10 @@ function createUrl(commodityName, commodityValue){
         Tx_State: 0,
         Tx_District: 0,
         Tx_Market: 0,
-        DateFrom: "01-May-2024",
-        DateTo: "02-May-2024",
-        Fr_Date: "01-May-2024",
-        To_Date: "02-May-2024",
+        DateFrom: "01-Jul-2024",
+        DateTo: "10-Jul-2024",
+        Fr_Date: "01-Jul-2024",
+        To_Date: "10-Jul-2024",
         Tx_Trend: 0,
         Tx_CommodityHead: encodeURIComponent(commodityName),
         Tx_StateHead: "--Select--",
@@ -29,7 +29,10 @@ function createUrl(commodityName, commodityValue){
 async function fetchData(url) {
     // console.log(url);
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(url, {
+            maxContentLength: Infinity, 
+            maxBodyLength: Infinity 
+        });
 
         const $ = cheerio.load(response.data);
         const tableRows = $("table.tableagmark_new tbody tr");
